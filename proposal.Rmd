@@ -1,0 +1,55 @@
+---
+title: "Proposal"
+output: html_document
+date: "2024-11-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+library(dplyr)
+```
+
+## Names:
+> Daphne Koutsoukos
+
+> Emma Brunsell
+
+> Manas Arumalla
+
+## Communication Plan:
+> We plan to meet with each other after each discussion (Monday at 2:30pm), create a groupchat and keep a github repository for all our files
+
+## Question of interest:
+> We want to know whether the population proportion of female survivors is greater than the proportion of female passangers. We would like to know this because common depictions of the Titanic events show that they attempted to save women and children first. We would like to see if this account is accurate
+
+## Link to the datasets: 
+>https://www.kaggle.com/c/titanic/data
+>https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list
+
+
+```{r cars}
+titanic <- read_csv("train.csv")
+
+titanic <- titanic%>%
+  select(Survived, Sex)
+
+proportions <- read_csv("titanic.csv")
+proportions <- proportions%>%
+  filter(!is.na(ticketno))%>%
+  select(gender)
+  
+head(titanic)
+head(proportions)
+```
+
+## Data Collection:
+> We are using 2 different datasets in this project. The first, titanic.csv, is used solely to calculate the population proportion between the 2 genders on board the Titanic. The second dataset is train.csv. This dataset is a randomly selected sample of passangers that were on board the titanic. It's original purpose was to create a machine learning model to predict whether a given passenger survived the crash. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors.
+
+## Graph Description:
+> 2 segmented bar graphs that show the proportions between the genders of the original passengers and the genders of the survivors
+
+## Inference Method:
+> A 1-tail inference on a single population proportion
