@@ -5,23 +5,40 @@ date: "2024-12-02"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      warning = FALSE, error = TRUE,
+                      fig.height = 3)
+library(tidyverse)
 
 ```
 
+# Introduction
+
+In many depictions of the Titanic tragedy, passengers and crew members often say "women and children first!" when filling the lifeboats as the ship sank. We would like to know whether or not women were actually saved at a higher rate than others, as shown in common depictions. After analyzing a sample of survivors against the population proportion of women on board, we found significant evidence that the proportion of women survivors is higher than the population proportion of women on board at the beginning of the trip.
+
+
+# Background
+
+We are using 2 different datasets in this project. The first, titanic.csv, is used solely to calculate the population proportion between the 2 genders on board the Titanic.
+
+>https://www.kaggle.com/c/titanic/data
+
+The second dataset is train.csv.
+
+>https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list
+
+This dataset is a randomly selected sample of passengers that were on board the titanic. It's original purpose was to create a machine learning model to predict whether a given passenger survived the crash. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors. This isn't a full population dataset, which could be an unusual factor in our data, but because it is a random sample, it should be statistically sound.
+
+
 ```{r}
 titanic <- read_csv("train.csv")
-
+proportions <- read_csv("titanic.csv")
 titanic <- titanic%>%
   select(Survived, Sex)
 
-proportions <- read_csv("titanic.csv")
 proportions <- proportions%>%
   filter(!is.na(ticketno))%>%
   select(gender)
-  
-head(titanic)
-head(proportions)
 
 female_num<- proportions%>%
   filter(gender == "female")%>%
@@ -31,31 +48,50 @@ male_num<- proportions%>%
   filter(gender == "male")%>%
   summarize(n=n())
 
-female_num
-male_num
-
-female_proportion = 446/(446+850)
-#actual female passenger proportion
-female_proportion
-
 female_survived<- titanic%>%
   filter(Sex == "female", Survived == 1)%>%
   summarize(n=n())
 
-total<- titanic%>%
+total_sample<- titanic%>%
   filter(Survived == 1)%>%
   summarize(n=n())
 
-female_survived
-total
+female_proportion = female_num$n/(female_num$n+male_num$n)
 
-female_survived_proportion = female_survived$n/total$n
+female_survived_proportion = female_survived$n/total_sample$n
+
+
+proportion_data <- tibble(
+  Category = c("Female Population Proportion", "Female Survivor Proportion"),
+  Proportion = c(female_proportion, female_survived_proportion)
+)
+
+# Create graph
+ggplot(proportion_data, aes(x = Category, y = Proportion, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Comparison of Female Population Proportion and Female Survivor Proportion",
+    y = "Proportion"
+  ) +
+  ylim(0, 1) +
+  theme(legend.position = "none")
+```
+
+```{r}
+#Actual population female passenger proportion, which will become our null hypothesis
+female_proportion
+
+#The proportion of female survivors taken from our sample of passengers
 female_survived_proportion
 ```
+
 ```{r}
-1-pbinom(female_survived$n-1,total$n,female_proportion)
+#Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship. This is an inference on a single population proportion.
+1-pbinom(female_survived$n-1, size = total_sample$n, prob = female_proportion)
 ```
-> H0: x=female_proportion Ha: x>female_proportion There is enough evidence to reject the null hypothesis
+
+
+> H0: x = female_proportion Ha: x > female_proportion There is enough evidence to reject the null hypothesis
 
 ```{r}
 gbinom(90, 0.5, col = "black") +
