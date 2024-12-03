@@ -1,0 +1,64 @@
+---
+title: "draft"
+output: html_document
+date: "2024-12-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r}
+titanic <- read_csv("train.csv")
+
+titanic <- titanic%>%
+  select(Survived, Sex)
+
+proportions <- read_csv("titanic.csv")
+proportions <- proportions%>%
+  filter(!is.na(ticketno))%>%
+  select(gender)
+  
+head(titanic)
+head(proportions)
+
+female_num<- proportions%>%
+  filter(gender == "female")%>%
+  summarize(n=n())
+
+male_num<- proportions%>%
+  filter(gender == "male")%>%
+  summarize(n=n())
+
+female_num
+male_num
+
+female_proportion = 446/(446+850)
+#actual female passenger proportion
+female_proportion
+
+female_survived<- titanic%>%
+  filter(Sex == "female", Survived == 1)%>%
+  summarize(n=n())
+
+total<- titanic%>%
+  filter(Survived == 1)%>%
+  summarize(n=n())
+
+female_survived
+total
+
+female_survived_proportion = female_survived$n/total$n
+female_survived_proportion
+```
+```{r}
+1-pbinom(female_survived$n-1,total$n,female_proportion)
+```
+> H0: x=female_proportion Ha: x>female_proportion There is enough evidence to reject the null hypothesis
+
+```{r}
+gbinom(90, 0.5, col = "black") +
+  geom_binom_density(90, 0.5, a = 60, lwd = 3, col = "dodgerblue")
+```
+
