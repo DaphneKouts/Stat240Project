@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE,
                       warning = FALSE, error = FALSE,
                       fig.height = 3)
 library(tidyverse)
-
+source("../scripts/ggprob.R")
 ```
 
 # Introduction
@@ -19,7 +19,7 @@ In many depictions of the Titanic tragedy, passengers and crew members often say
 
 # Background
 
-We are using 2 different datasets in this project. The first, titanic.csv, is used solely to calculate the population proportion between the 2 genders on board the Titanic.
+We are using 2 different datasets in this project. The first, titanic.csv, is used solely to calculate the population proportion of females that were initially on board the titanic.
 
 >https://www.kaggle.com/c/titanic/data
 
@@ -27,7 +27,7 @@ The second dataset is train.csv.
 
 >https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list
 
-This dataset is a randomly selected sample of passengers that were on board the titanic. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors. This isn't a full population dataset, which could be an unusual factor in our data, but because it is a random sample, it should be statistically sound.
+This dataset is a randomly selected sample of passengers that were on board the titanic. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors. This isn't a full population dataset, which could be an unusual factor in our data, but because it is a large random sample, it is statistically sound.
 
 # Analysis
 
@@ -61,7 +61,6 @@ female_proportion = female_num$n/(female_num$n+male_num$n)
 
 female_survived_proportion = female_survived$n/total_sample$n
 
-
 proportion_data <- tibble(
   Category = c("Female Population Proportion", "Female Survivor Proportion"),
   Proportion = c(female_proportion, female_survived_proportion)
@@ -88,11 +87,11 @@ ggplot(proportion_data, aes(x = Category, y = Proportion, fill = Category)) +
 > As seen in the figure above, there appears to be a large difference between the proportions of female passengers and survivors of the ship. This can be a good hint that there is a significant difference between these proportions, but we still need to conduct further analysis.
 
 ## Statistical Analysis:
->The parameters of interest are the proportions of female passengers and female suvivors of the Titanic. We are testing whether there is a greater proportion of female survivors than passengers
+>The parameters of interest are the proportions of female passengers and female suvivors of the Titanic. We are testing whether there is a greater proportion of female survivors than female overall passengers.
 
 >This is a 1-tailed inference on a single sample proportion
 
-> Our assumptions are that this follows a binomial distribution. There is a continuous rate, or a proportion of female survivors, the chance of each person surviving is independent from each other, there is a set number of people aboard the ship in this random sample, and a given survivor can either be male or female.
+> Our assumptions are that this follows a binomial distribution. There is a continuous rate, or proportion of female survivors, the chance of each person surviving is independent from each other, there is a set number of people aboard the ship in this random sample, and a given survivor can either be male or female.
 
 > Let x be the proportion of female survivors on the Titanic.
 
@@ -114,12 +113,20 @@ female_proportion
 female_survived_proportion
 ```
 
+```{r}
+gbinom(total_sample$n, female_proportion, scale = TRUE, col = "black") +
+  geom_vline(xintercept = female_survived$n, color = "red", lty = 2)
 
-> Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship.
+```
+
+
+> Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship. We needed to use a calculator to get an exact p-value of 7.651012e-35, because the R console was rounding to 0. This value is still saved in a p_value variable. The probability of getting a result as extreme as we did given the null hypothesis is the area under the curve to the right of the red line in the graph above.
 
 ```{r}
 #Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship. This is an inference on a single population proportion.
-1-pbinom(female_survived$n-1, size = total_sample$n, prob = female_proportion)
+p_value <- 1-pbinom(female_survived$n-1, size = total_sample$n, prob = female_proportion)
+print(7.651012*10^-35)
+
 ```
 
 > There is enough evidence to reject the null hypothesis
@@ -127,8 +134,7 @@ female_survived_proportion
 # Discussion
 
 ## Interpretation and Conclusion:
-> Because we have a p-value extremely close to 0 and less than alpha, we can reject the null hypothesis that the proportions of female survivors is equal to the proportion of female passengers on the Titanic. In conclusion,
-we have significant evidence to suggest that the proportion of women survivors is higher than the population proportion of women on board at the beginning of the trip. This correlates to the idea that depictions of the tragedy often portrayed the prioritization of women and children surviving.
+> Because we have a p-value extremely close to 0 and less than alpha, we can reject the null hypothesis that the proportions of female survivors is equal to the proportion of female passengers on the Titanic. In conclusion, we have significant evidence to suggest that the proportion of women survivors is higher than the population proportion of women on board at the beginning of the trip. This correlates to the idea that depictions of the tragedy often portrayed the prioritization of women and children surviving.
 
 ## Shortcomings:
 > Our data was not the full population of the passengers, merely a random sample of the majority of the passengers with their survival data, so even though it is not perfect, it should be statistically sound. Additionally, we do not officially know whether the survival rate of each given person is independent, as one person could have risked their survival to help someone else
