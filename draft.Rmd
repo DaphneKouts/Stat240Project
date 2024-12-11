@@ -1,12 +1,12 @@
 ---
-title: "draft"
+title: "Draft"
 output: html_document
-date: "2024-12-02"
+date: "2024-12-04"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE,
-                      warning = FALSE, error = TRUE,
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      warning = FALSE, error = FALSE,
                       fig.height = 3)
 library(tidyverse)
 
@@ -27,8 +27,9 @@ The second dataset is train.csv.
 
 >https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list
 
-This dataset is a randomly selected sample of passengers that were on board the titanic. It's original purpose was to create a machine learning model to predict whether a given passenger survived the crash. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors. This isn't a full population dataset, which could be an unusual factor in our data, but because it is a random sample, it should be statistically sound.
+This dataset is a randomly selected sample of passengers that were on board the titanic. This dataset contains 891 out of the total 1300 passengers on board. We will use this dataset to get a sample proportion of survivors. This isn't a full population dataset, which could be an unusual factor in our data, but because it is a random sample, it should be statistically sound.
 
+# Analysis
 
 ```{r}
 titanic <- read_csv("train.csv")
@@ -66,6 +67,13 @@ proportion_data <- tibble(
   Proportion = c(female_proportion, female_survived_proportion)
 )
 
+```
+
+
+## Initial impressions
+
+```{r}
+
 # Create graph
 ggplot(proportion_data, aes(x = Category, y = Proportion, fill = Category)) +
   geom_bar(stat = "identity") +
@@ -77,24 +85,53 @@ ggplot(proportion_data, aes(x = Category, y = Proportion, fill = Category)) +
   theme(legend.position = "none")
 ```
 
+> As seen in the figure above, there appears to be a large difference between the proportions of female passengers and survivors of the ship. This can be a good hint that there is a significant difference between these proportions, but we still need to conduct further analysis.
+
+## Statistical Analysis:
+>The parameters of interest are the proportions of female passengers and female suvivors of the Titanic. We are testing whether there is a greater proportion of female survivors than passengers
+
+>This is a 1-tailed inference on a single sample proportion
+
+> Our assumptions are that this follows a binomial distribution. There is a continuous rate, or a proportion of female survivors, the chance of each person surviving is independent from each other, there is a set number of people aboard the ship in this random sample, and a given survivor can either be male or female.
+
+> Let x be the proportion of female survivors on the Titanic.
+
+# Hypothesis test 
+> With these models, we will conduct a 1-tailed hypothesis test using a single sample proportion 
+
+> H0: x = female_proportion Ha: x > female_proportion. alpha = 0.05
+
+>Actual population female passenger proportion, which will become our null hypothesis
+
 ```{r}
 #Actual population female passenger proportion, which will become our null hypothesis
 female_proportion
+```
 
-#The proportion of female survivors taken from our sample of passengers
+>The proportion of female survivors taken from our sample of passengers 
+
+```{r}
 female_survived_proportion
 ```
+
+
+> Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship.
 
 ```{r}
 #Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship. This is an inference on a single population proportion.
 1-pbinom(female_survived$n-1, size = total_sample$n, prob = female_proportion)
 ```
 
+> There is enough evidence to reject the null hypothesis
 
-> H0: x = female_proportion Ha: x > female_proportion There is enough evidence to reject the null hypothesis
+# Discussion
 
-```{r}
-gbinom(90, 0.5, col = "black") +
-  geom_binom_density(90, 0.5, a = 60, lwd = 3, col = "dodgerblue")
-```
+## Interpretation and Conclusion:
+> Because we have a p-value extremely close to 0 and less than alpha, we can reject the null hypothesis that the proportions of female survivors is equal to the proportion of female passengers on the Titanic. In conclusion,
+we have significant evidence to suggest that the proportion of women survivors is higher than the population proportion of women on board at the beginning of the trip. This correlates to the idea that depictions of the tragedy often portrayed the prioritization of women and children surviving.
 
+## Shortcomings:
+> Our data was not the full population of the passengers, merely a random sample of the majority of the passengers with their survival data, so even though it is not perfect, it should be statistically sound. Additionally, we do not officially know whether the survival rate of each given person is independent, as one person could have risked their survival to help someone else
+
+## Future Research:
+> In the future we would like to use the full population survival data, instead of just a large random sample of passengers. Additionally, we can do proportion tests based on other metrics, such as social class or age.

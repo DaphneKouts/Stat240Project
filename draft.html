@@ -10,9 +10,9 @@
 
 
 
-<meta name="date" content="2024-12-02" />
+<meta name="date" content="2024-12-04" />
 
-<title>draft</title>
+<title>Draft</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -349,8 +349,8 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">draft</h1>
-<h4 class="date">2024-12-02</h4>
+<h1 class="title toc-ignore">Draft</h1>
+<h4 class="date">2024-12-04</h4>
 
 </div>
 
@@ -379,74 +379,111 @@ between the 2 genders on board the Titanic.</p>
 <p><a href="https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list" class="uri">https://www.kaggle.com/datasets/aliaamiri/titanic-passengers-and-crew-complete-list</a></p>
 </blockquote>
 <p>This dataset is a randomly selected sample of passengers that were on
-board the titanic. It’s original purpose was to create a machine
-learning model to predict whether a given passenger survived the crash.
-This dataset contains 891 out of the total 1300 passengers on board. We
-will use this dataset to get a sample proportion of survivors. This
-isn’t a full population dataset, which could be an unusual factor in our
-data, but because it is a random sample, it should be statistically
-sound.</p>
-<pre class="r"><code>titanic &lt;- read_csv(&quot;train.csv&quot;)
-proportions &lt;- read_csv(&quot;titanic.csv&quot;)
-titanic &lt;- titanic%&gt;%
-  select(Survived, Sex)
-
-proportions &lt;- proportions%&gt;%
-  filter(!is.na(ticketno))%&gt;%
-  select(gender)
-
-female_num&lt;- proportions%&gt;%
-  filter(gender == &quot;female&quot;)%&gt;%
-  summarize(n=n())
-
-male_num&lt;- proportions%&gt;%
-  filter(gender == &quot;male&quot;)%&gt;%
-  summarize(n=n())
-
-female_survived&lt;- titanic%&gt;%
-  filter(Sex == &quot;female&quot;, Survived == 1)%&gt;%
-  summarize(n=n())
-
-total_sample&lt;- titanic%&gt;%
-  filter(Survived == 1)%&gt;%
-  summarize(n=n())
-
-female_proportion = female_num$n/(female_num$n+male_num$n)
-
-female_survived_proportion = female_survived$n/total_sample$n
-
-
-proportion_data &lt;- tibble(
-  Category = c(&quot;Female Population Proportion&quot;, &quot;Female Survivor Proportion&quot;),
-  Proportion = c(female_proportion, female_survived_proportion)
-)
-
-# Create graph
-ggplot(proportion_data, aes(x = Category, y = Proportion, fill = Category)) +
-  geom_bar(stat = &quot;identity&quot;) +
-  labs(
-    title = &quot;Comparison of Female Population Proportion and Female Survivor Proportion&quot;,
-    y = &quot;Proportion&quot;
-  ) +
-  ylim(0, 1) +
-  theme(legend.position = &quot;none&quot;)</code></pre>
+board the titanic. This dataset contains 891 out of the total 1300
+passengers on board. We will use this dataset to get a sample proportion
+of survivors. This isn’t a full population dataset, which could be an
+unusual factor in our data, but because it is a random sample, it should
+be statistically sound.</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="initial-impressions" class="section level2">
+<h2>Initial impressions</h2>
 <p><img src="data:image/png;base64,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" width="672" /></p>
-<pre class="r"><code>#Actual population female passenger proportion, which will become our null hypothesis
-female_proportion</code></pre>
+<blockquote>
+<p>As seen in the figure above, there appears to be a large difference
+between the proportions of female passengers and survivors of the ship.
+This can be a good hint that there is a significant difference between
+these proportions, but we still need to conduct further analysis.</p>
+</blockquote>
+</div>
+<div id="statistical-analysis" class="section level2">
+<h2>Statistical Analysis:</h2>
+<blockquote>
+<p>The parameters of interest are the proportions of female passengers
+and female suvivors of the Titanic. We are testing whether there is a
+greater proportion of female survivors than passengers</p>
+</blockquote>
+<blockquote>
+<p>This is a 1-tailed inference on a single sample proportion</p>
+</blockquote>
+<blockquote>
+<p>Our assumptions are that this follows a binomial distribution. There
+is a continuous rate, or a proportion of female survivors, the chance of
+each person surviving is independent from each other, there is a set
+number of people aboard the ship in this random sample, and a given
+survivor can either be male or female.</p>
+</blockquote>
+<blockquote>
+<p>Let x be the proportion of female survivors on the Titanic.</p>
+</blockquote>
+</div>
+</div>
+<div id="hypothesis-test" class="section level1">
+<h1>Hypothesis test</h1>
+<blockquote>
+<p>With these models, we will conduct a 1-tailed hypothesis test using a
+single sample proportion</p>
+</blockquote>
+<blockquote>
+<p>H0: x = female_proportion Ha: x &gt; female_proportion. alpha =
+0.05</p>
+</blockquote>
+<blockquote>
+<p>Actual population female passenger proportion, which will become our
+null hypothesis</p>
+</blockquote>
 <pre><code>## [1] 0.3541033</code></pre>
-<pre class="r"><code>#The proportion of female survivors taken from our sample of passengers
-female_survived_proportion</code></pre>
+<blockquote>
+<p>The proportion of female survivors taken from our sample of
+passengers</p>
+</blockquote>
 <pre><code>## [1] 0.6812865</code></pre>
-<pre class="r"><code>#Calculating the probability of the resulting number of female survivors or more surviving assuming that the probability of any given female surviving is equal to the proportion of females on the ship. This is an inference on a single population proportion.
-1-pbinom(female_survived$n-1, size = total_sample$n, prob = female_proportion)</code></pre>
+<blockquote>
+<p>Calculating the probability of the resulting number of female
+survivors or more surviving assuming that the probability of any given
+female surviving is equal to the proportion of females on the ship.</p>
+</blockquote>
 <pre><code>## [1] 0</code></pre>
 <blockquote>
-<p>H0: x = female_proportion Ha: x &gt; female_proportion There is
-enough evidence to reject the null hypothesis</p>
+<p>There is enough evidence to reject the null hypothesis</p>
 </blockquote>
-<pre class="r"><code>gbinom(90, 0.5, col = &quot;black&quot;) +
-  geom_binom_density(90, 0.5, a = 60, lwd = 3, col = &quot;dodgerblue&quot;)</code></pre>
-<pre><code>## Error in gbinom(90, 0.5, col = &quot;black&quot;): could not find function &quot;gbinom&quot;</code></pre>
+</div>
+<div id="discussion" class="section level1">
+<h1>Discussion</h1>
+<div id="interpretation-and-conclusion" class="section level2">
+<h2>Interpretation and Conclusion:</h2>
+<blockquote>
+<p>Because we have a p-value extremely close to 0 and less than alpha,
+we can reject the null hypothesis that the proportions of female
+survivors is equal to the proportion of female passengers on the
+Titanic. In conclusion, we have significant evidence to suggest that the
+proportion of women survivors is higher than the population proportion
+of women on board at the beginning of the trip. This correlates to the
+idea that depictions of the tragedy often portrayed the prioritization
+of women and children surviving.</p>
+</blockquote>
+</div>
+<div id="shortcomings" class="section level2">
+<h2>Shortcomings:</h2>
+<blockquote>
+<p>Our data was not the full population of the passengers, merely a
+random sample of the majority of the passengers with their survival
+data, so even though it is not perfect, it should be statistically
+sound. Additionally, we do not officially know whether the survival rate
+of each given person is independent, as one person could have risked
+their survival to help someone else</p>
+</blockquote>
+</div>
+<div id="future-research" class="section level2">
+<h2>Future Research:</h2>
+<blockquote>
+<p>In the future we would like to use the full population survival data,
+instead of just a large random sample of passengers. Additionally, we
+can do proportion tests based on other metrics, such as social class or
+age.</p>
+</blockquote>
+</div>
 </div>
 
 
